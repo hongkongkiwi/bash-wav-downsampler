@@ -18,13 +18,15 @@ control_c()
 trap control_c SIGINT
 
 # Setup our variables
+OUTPUT_DIR="downsampled"
+OUTPUT_BITDEPTH=16
+OUTPUT_KHZ="10k"
+OUTPUT_CHANNELS=1
+
+# Do some variable magic and find the f iles
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 FILES=`find "$DIR" -maxdepth 1 -type f -name "*.wav" -exec echo {} \;`
-OUTPUT_DIR="downsampled"
-OUTPUT_BITDEPTH=8
-OUTPUT_KHZ="8k"
 FILE_COUNT=`echo "$FILES" | wc -l | tr -d ' '`
-
 OUTPUT_DIR="$DIR/$OUTPUT_DIR"
 
 # Check if output dir exists, if not create it
@@ -54,7 +56,8 @@ do
 	filename="${filename%.*}"
 
 	echo " -> Downsampling $filename.$extension ..."
-	sox "$f" -b $OUTPUT_BITDEPTH -r "$OUTPUT_BITDEPTH" "$OUTPUT_DIR/$filename.$extension"
+	# -e mu-law
+	sox "$f" -q --clobber -G -c 1 --no-glob --temp "/tmp" -b $OUTPUT_BITDEPTH -r $OUTPUT_KHZ "$OUTPUT_DIR/$filename.$extension"
 done
 IFS=$SAVEIFS
 
